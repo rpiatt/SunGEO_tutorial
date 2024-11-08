@@ -8,7 +8,7 @@ If you would like to run the tutorial code locally (on your own computer), make 
 
 
 You can also open and run the code *in the cloud* :sunglasses: using the binder button below (note that the notebook will take ~10 minutes to launch)   
-Once the application launches:
+Once the application launches:   
 - Select the rstudio button
 - Open the desired notebook
   
