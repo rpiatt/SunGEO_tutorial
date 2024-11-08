@@ -70,7 +70,7 @@ precipAndLandcover
 ## Using outside data
 
 ```{r}
-healthcareLocations <- read_xlsx("/Users/ryanpiatt/Desktop/sungeo/sub-saharan_health_facilities.xlsx")
+healthcareLocations <- read_xlsx("data/sub-saharan_health_facilities.xlsx")
 
 healthcareLocations
 ```
@@ -148,7 +148,7 @@ precipAndLandcover
 # 
 
 ```{r}
-malariaData <- read.csv("/Users/ryanpiatt/Desktop/Subnational_Unit-data2016.csv")
+malariaData <- read.csv("data/Subnational_Unit-data2016.csv")
 names(malariaData)[names(malariaData) == "Name"] <- "ADM1_NAME"
 malariaData
 ```
