@@ -84,7 +84,7 @@ healthcareLocations
 ```{r}
 polysAfr <- gadm(country = countries,
                  level = 1,
-                 path = '/Users/ryanpiatt/Desktop/sungeo'
+                 path = 'data/'
                  )
 
 polysAfr
