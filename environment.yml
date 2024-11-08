@@ -1,0 +1,19 @@
+name: SunGEO-tutorial-original-binder
+channels:
+- conda-forge
+- defaults
+dependencies:
+- jupyter
+- quarto
+- r-base
+- r-irkernel
+- r-tidyverse
+- r-SUNGEO
+- r-readxl
+- r-sf
+- r-geodata
+- r-terra
+- r-dplyr
+- r-car
+- r-lwgeom
+- r-RColorBrewer
