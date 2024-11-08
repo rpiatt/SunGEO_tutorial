@@ -5,7 +5,6 @@ channels:
 dependencies:
 - jupyter
 - quarto
-- rstudio
 - r-quarto
 - r-base
 - r-irkernel
