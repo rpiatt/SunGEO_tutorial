@@ -8,21 +8,21 @@ editor: visual
 # SunGEO in R
 
 ```{r}
-install.packages("swirl")
-library(swirl)
-swirl()
+#install.packages("swirl")
+#library(swirl)
+#swirl()
 ```
 
 ```{r}
-install.packages("SUNGEO", dependencies = TRUE)
-install.packages("readxl")
-install.packages("sf", type = "source" )
-install.packages("geodata")
-install.packages("terra")
-install.packages("dplyr")
-install.packages("car")
-install.packages("lwgeom")
-install.packages("RColorBrewer")
+#install.packages("SUNGEO", dependencies = TRUE)
+#install.packages("readxl")
+#install.packages("sf", type = "source" )
+#install.packages("geodata")
+#install.packages("terra")
+#install.packages("dplyr")
+#install.packages("car")
+#install.packages("lwgeom")
+#install.packages("RColorBrewer")
 ```
 
 ```{r}
