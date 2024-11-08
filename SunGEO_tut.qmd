@@ -1,0 +1,266 @@
+---
+title: "SunGEO_tut"
+author: "Ryan Piatt"
+format: html
+editor: visual
+---
+
+# SunGEO in R
+
+```{r}
+install.packages("swirl")
+library(swirl)
+swirl()
+```
+
+```{r}
+install.packages("SUNGEO", dependencies = TRUE)
+install.packages("readxl")
+install.packages("sf", type = "source" )
+install.packages("geodata")
+install.packages("terra")
+install.packages("dplyr")
+install.packages("car")
+install.packages("lwgeom")
+install.packages("RColorBrewer")
+```
+
+```{r}
+library(SUNGEO)
+library(readxl)
+library(sf)
+library(geodata)
+library(terra)
+library(dplyr)
+library(car)
+library(lwgeom)
+library(RColorBrewer)
+```
+
+## Download data with the SunGEO API
+
+```{r}
+countries <- c("DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF", "TCD",
+               "COM", "COG", "COD", "CIV", "DJI", "EGY", "GNQ", "ERI", "ETH", "GAB",
+               "GMB", "GHA", "GIN", "GNB", "KEN", "LSO", "LBR", "LBY", "MDG", "MWI",
+               "MLI", "MRT", "MUS", "MAR", "MYT", "MOZ", "NAM", "NER", "NGA", "RWA",
+               "REU", "SEN", "SYC", "SLE", "SOM", "ZAF", "SSD", "SDN", "SWZ", "STP",
+               "TZA", "TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE")
+
+pcpAndLc <- c("Weather:AirTemperatureAndPrecipitation:NOAA", "Terrain:LandCover:GLCC")
+```
+
+```{r}
+precipAndLandcover <- get_data(
+  country_iso3 = countries,
+  topics = pcpAndLc,
+  year_min = 2016, year_max = 2016, time_unit = "year",
+  geoset = "GADM", space_unit = "adm1"
+)
+
+precipAndLandcover
+```
+
+### easy!
+
+# 
+
+# 
+
+## Using outside data
+
+```{r}
+healthcareLocations <- read_xlsx("/Users/ryanpiatt/Desktop/sungeo/sub-saharan_health_facilities.xlsx")
+
+healthcareLocations
+```
+
+```{r}
+healthcareLocations <- st_as_sf(healthcareLocations, coords = c("Long", "Lat"))
+
+healthcareLocations
+```
+
+```{r}
+polysAfr <- gadm(country = countries,
+                 level = 1,
+                 path = '/Users/ryanpiatt/Desktop/sungeo'
+                 )
+
+polysAfr
+```
+
+```{r}
+plot(polysAfr["NAME_1"])
+```
+
+```{r}
+polysAfrSf <- st_as_sf(polysAfr)
+st_crs(polysAfrSf)
+
+st_crs(healthcareLocations) <- st_crs(polysAfrSf)
+```
+
+```{r}
+plot(polysAfr["NAME_1"])
+plot(healthcareLocations, add = TRUE)
+```
+
+```{r}
+?st_intersects
+```
+
+```{r}
+?sapply
+```
+
+```{r}
+?length
+```
+
+```{r}
+polysAfrSf <- st_make_valid(polysAfrSf)
+```
+
+```{r}
+intersections <- st_intersects(polysAfrSf, healthcareLocations)
+intersections
+```
+
+```{r}
+numPoints <- sapply(intersections, length)
+numPoints
+```
+
+```{r}
+polysAfrSf$numHealthcareFacilites <- numPoints
+polysAfrSf
+```
+
+```{r}
+africaData <- as.data.frame(st_drop_geometry(polysAfrSf))
+africaData
+precipAndLandcover
+```
+
+### phew...
+
+# 
+
+```{r}
+malariaData <- read.csv("/Users/ryanpiatt/Desktop/Subnational_Unit-data2016.csv")
+names(malariaData)[names(malariaData) == "Name"] <- "ADM1_NAME"
+malariaData
+```
+
+```{r}
+malariaIncidence <- malariaData %>% filter(Units == "Cases per Thousand")
+malariaMortality <- malariaData %>% filter(Units == "Deaths per 100 Thousand")
+malariaIncidence
+malariaMortality
+```
+
+```{r}
+names(malariaIncidence)[names(malariaIncidence) == "Value"] <- "malariaIncidence"
+names(malariaMortality)[names(malariaMortality) == "Value"] <- "malariaMortality"
+malariaIncidence
+malariaMortality
+```
+
+```{r}
+names(africaData)[names(africaData) == "NAME_1"] <- "ADM1_NAME"
+africaData
+```
+
+## Putting it together
+
+```{r}
+distinctHealthcare <- africaData %>% distinct(ADM1_NAME, .keep_all = TRUE)
+distinctHealthcare
+distinctNOAA <- precipAndLandcover %>% distinct(ADM1_NAME, .keep_all = TRUE)
+distinctNOAA
+distinctMi <-malariaIncidence %>% distinct(ADM1_NAME, .keep_all = TRUE)
+distinctMi
+distinctMm <- malariaMortality %>% distinct(ADM1_NAME, .keep_all = TRUE)
+distinctMm
+```
+
+```{r}
+allData <- distinctHealthcare %>%
+  inner_join(distinctNOAA, by = "ADM1_NAME") %>%
+  inner_join(distinctMi, by = "ADM1_NAME") %>%
+  inner_join(distinctMm, by = "ADM1_NAME")
+
+allData
+```
+
+```{r}
+columnsWeWant <- c("GID_1", "COUNTRY", "ADM1_NAME", "numHealthcareFacilites", "NOAA_TEMP", "NOAA_RAIN", "GLCC_WETLAND", "malariaIncidence", "malariaMortality")
+
+finalData <- allData[, columnsWeWant]
+finalData
+```
+
+```{r}
+cleanData <- na.omit(finalData[, c("GID_1", "COUNTRY", "ADM1_NAME", "numHealthcareFacilites", "NOAA_TEMP", "NOAA_RAIN", "GLCC_WETLAND", "malariaIncidence", "malariaMortality")])
+
+cleanData <- cleanData %>% filter(numHealthcareFacilites != 0)
+
+cleanData
+```
+
+# 
+
+## Analysis
+
+```{r}
+pairs(cleanData[, 4:9])
+```
+
+```{r}
+cor(cleanData[, 4:9], use = "complete.obs")
+```
+
+```{r}
+vif(lm(malariaMortality ~ GLCC_WETLAND + NOAA_RAIN + NOAA_TEMP + numHealthcareFacilites, data = cleanData))
+```
+
+```{r}
+incidenceModel <- lm(malariaIncidence ~ GLCC_WETLAND + NOAA_RAIN + NOAA_TEMP + numHealthcareFacilites, data = cleanData)
+mortalityModel <- lm(malariaMortality ~ GLCC_WETLAND + NOAA_RAIN + NOAA_TEMP + numHealthcareFacilites, data = cleanData)
+
+summary(incidenceModel)
+```
+
+```{r}
+summary(mortalityModel)
+```
+
+```{r}
+cleanData$incidenceResiduals <- residuals(incidenceModel)
+cleanData$mortalityResiduals <- residuals(mortalityModel)
+
+cleanData
+```
+
+```{r}
+residualVariables <- cleanData[, c("GID_1", "incidenceResiduals", "mortalityResiduals")]
+
+polysAfr <- merge(polysAfr, residualVariables, by = "GID_1")
+
+polysAfr
+```
+
+```{r}
+num_colors = 7
+color_palette <- brewer.pal(7, "RdBu")
+vals <- polysAfr$mortalityResiduals
+breaks <- quantile(vals, probs = seq(0, 1, length.out = num_colors + 1), na.rm = TRUE) 
+color_bins <- cut(vals, breaks = breaks, include.lowest = TRUE)
+
+coloring <- color_palette[color_bins]
+#coloring[is.na(coloring)] <- "gray"
+par(bg = "darkgray")
+
+plot(polysAfr, col = coloring, main = "Linear Model - Malaria Mortality Residuals")
+```
