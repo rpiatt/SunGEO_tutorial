@@ -4,6 +4,7 @@ channels:
 - defaults
 dependencies:
 - jupyter
+- quarto
 - r-quarto
 - r-base
 - r-irkernel
