@@ -18,7 +18,7 @@ Once the application launches:
      
              
 Citations:    
-[SunGEO]((https://www.sungeo.org/))    
+[SunGEO](https://www.sungeo.org/)    
 [The Malaria Atlas Project](https://data.malariaatlas.org/trends?year=2022&metricGroup=Malaria&geographicLevel=admin0&metricSubcategory=Pf&metricType=rate&metricName=incidence)   
-[The Humanitarian Data Exchange]((https://data.humdata.org/dataset/health-facilities-in-sub-saharan-africa?))    
-[GADM]((https://gadm.org/))    
+[The Humanitarian Data Exchange](https://data.humdata.org/dataset/health-facilities-in-sub-saharan-africa?)    
+[GADM](https://gadm.org/)    
