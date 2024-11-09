@@ -4,7 +4,7 @@ If you would like to run the tutorial code locally (on your own computer), make 
 - Install [r](https://www.r-project.org/) and [rstudio](https://posit.co/download/rstudio-desktop/)
 - Download the supporting data (in the "data" folder)
   - you won't need the GADM data (the notebooks will download it), but it can speed things up
-- Download the code we walked through in the video (xxx will match the script used in video, xxx includes more detailed explanation of code not covered in video)
+- Download the code we walked through in the video (SunGEO_tut.qmd will match the script used in video, SunGEO_tut_commented.qmd includes more detailed explanation of code not covered in video)
 
 
 
@@ -14,3 +14,11 @@ Once the application launches:
 - Open the desired notebook
   
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rpiatt/SunGEO_tutorial/HEAD)
+
+     
+             
+Citations:    
+[SunGEO]([url](https://www.sungeo.org/))    
+[The Malaria Atlas Project](https://data.malariaatlas.org/trends?year=2022&metricGroup=Malaria&geographicLevel=admin0&metricSubcategory=Pf&metricType=rate&metricName=incidence)   
+[The Humanitarian Data Exchange]([url](https://data.humdata.org/dataset/health-facilities-in-sub-saharan-africa?))    
+[GADM]([url](https://gadm.org/))    
