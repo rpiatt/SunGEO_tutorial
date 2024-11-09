@@ -1,0 +1,297 @@
+# SunGEO in R
+
+```{r}
+#install.packages("swirl")
+#library(swirl)
+#swirl()
+```
+
+```{r}
+#install.packages("SUNGEO", dependencies = TRUE)
+#install.packages("readxl")
+#install.packages("sf", type = "source" )
+#install.packages("geodata")
+#install.packages("terra")
+#install.packages("dplyr")
+#install.packages("car")
+#install.packages("lwgeom")
+#install.packages("RColorBrewer")
+```
+
+```{r}
+library(SUNGEO)
+library(readxl)
+library(sf)
+library(geodata)
+library(terra)
+library(dplyr)
+library(car)
+library(lwgeom)
+library(RColorBrewer)
+```
+
+## Download data with the SunGEO API
+
+```{r}
+countries <- c("DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF", "TCD",
+               "COM", "COG", "COD", "CIV", "DJI", "EGY", "GNQ", "ERI", "ETH", "GAB",
+               "GMB", "GHA", "GIN", "GNB", "KEN", "LSO", "LBR", "LBY", "MDG", "MWI",
+               "MLI", "MRT", "MUS", "MAR", "MYT", "MOZ", "NAM", "NER", "NGA", "RWA",
+               "REU", "SEN", "SYC", "SLE", "SOM", "ZAF", "SSD", "SDN", "SWZ", "STP",
+               "TZA", "TGO", "TUN", "UGA", "ESH", "ZMB", "ZWE")
+
+pcpAndLc <- c("Weather:AirTemperatureAndPrecipitation:NOAA", "Terrain:LandCover:GLCC")
+```
+
+```{r}
+precipAndLandcover <- get_data(
+  country_iso3 = countries,
+  topics = pcpAndLc,
+  year_min = 2016, year_max = 2016, time_unit = "year",
+  geoset = "GADM", space_unit = "adm1"
+)
+
+precipAndLandcover
+```
+
+### easy!
+
+# 
+
+# 
+
+## Using outside data
+
+```{r}
+#if running locally, make sure to update the file path here to wherever you may have the healthcare facility data saved
+healthcareLocations <- read_xlsx("data/sub-saharan_health_facilities.xlsx")
+
+healthcareLocations
+```
+
+```{r}
+#the healthcare locations data set has a latitude and longitude column, named Lat and Long. This code block converts the 
+#data into a 'simple features' object, a data type in r that can store spatial information, and sets the coordinates of 
+#each healthcare facility based on the values in the Lat and Long columns.
+healthcareLocations <- st_as_sf(healthcareLocations, coords = c("Long", "Lat"))
+
+healthcareLocations
+```
+
+```{r}
+polysAfr <- gadm(country = countries,
+                 level = 1,
+                 path = 'data/'
+                 )
+
+polysAfr
+```
+
+```{r}
+plot(polysAfr["NAME_1"])
+```
+
+```{r}
+#this code block converts the state polygons to simple feature objects (as above). It also assigns the healthcareLocations 
+#data the same coordinate reference system (crs) as the crs native to the africa state polygons. 
+polysAfrSf <- st_as_sf(polysAfr)
+st_crs(polysAfrSf)
+
+st_crs(healthcareLocations) <- st_crs(polysAfrSf)
+```
+
+```{r}
+#converting both data sets to data types compatible with spatial information, and ensuring they are in the same crs, allows
+#us to perform analyses dependent on spatial overlap or proximity between features. We can visualize the spatial element
+#of our data as well. 
+plot(polysAfr["NAME_1"])
+plot(healthcareLocations, add = TRUE)
+```
+
+```{r}
+?st_intersects
+```
+
+```{r}
+?sapply
+```
+
+```{r}
+?length
+```
+
+```{r}
+#this code block ensures that there are no topological issues with the state boundaries. An example of a topological issue would
+#be if two state boundaries overlap each other, signifying that a given area belongs to two separate states or countries. 
+#errors such as these can create problems with the further analysis we are doing. 
+polysAfrSf <- st_make_valid(polysAfrSf)
+```
+
+```{r}
+#this code creates a list of features for each state polygon. In this list will be all of the healthcare facilities that are
+#within said polygon (or an empty list, if there are none). 
+intersections <- st_intersects(polysAfrSf, healthcareLocations)
+intersections
+```
+
+```{r}
+#sapply runs a given, user-inputted function over all the entries in a list, returning the output of that function
+#as calculated for each list entry. We just use a simple 'length' function already included in r, which will return the 
+#"length," of each list, aka, a count of the number of healthcare facilities within each state boundary.
+numPoints <- sapply(intersections, length)
+numPoints
+```
+
+```{r}
+#this code appends the healthcare facility counts back into our data frame of state boundaries as a new column.
+polysAfrSf$numHealthcareFacilites <- numPoints
+polysAfrSf
+```
+
+```{r}
+#this code removes the spatial component of our data, reverting the data type back to a general data frame, for ease of use 
+#in any statistical analysis we do which does not require spatial information.
+africaData <- as.data.frame(st_drop_geometry(polysAfrSf))
+africaData
+precipAndLandcover
+```
+
+### phew...
+
+# 
+
+```{r}
+#as above, ensure you have put a valid file path here
+malariaData <- read.csv("data/Subnational_Unit-data2016.csv")
+names(malariaData)[names(malariaData) == "Name"] <- "ADM1_NAME"
+malariaData
+```
+
+```{r}
+#the malaria data comes to use with both incidence and mortality data mixed together
+#this code creates a separate data frame for each
+malariaIncidence <- malariaData %>% filter(Units == "Cases per Thousand")
+malariaMortality <- malariaData %>% filter(Units == "Deaths per 100 Thousand")
+malariaIncidence
+malariaMortality
+```
+
+```{r}
+names(malariaIncidence)[names(malariaIncidence) == "Value"] <- "malariaIncidence"
+names(malariaMortality)[names(malariaMortality) == "Value"] <- "malariaMortality"
+malariaIncidence
+malariaMortality
+```
+
+```{r}
+names(africaData)[names(africaData) == "NAME_1"] <- "ADM1_NAME"
+africaData
+```
+
+## Putting it together
+
+```{r}
+#This code removes any duplicate state names from the data. In reality, duplicate names may indeed be valid,
+#i.e., if two african countries both have states that share a name, but for our purposes it's easier to remove them.
+#in the following code block, we will be joining the data sets together, and duplicate names could cause issues.
+distinctHealthcare <- africaData %>% distinct(ADM1_NAME, .keep_all = TRUE)
+distinctHealthcare
+distinctNOAA <- precipAndLandcover %>% distinct(ADM1_NAME, .keep_all = TRUE)
+distinctNOAA
+distinctMi <-malariaIncidence %>% distinct(ADM1_NAME, .keep_all = TRUE)
+distinctMi
+distinctMm <- malariaMortality %>% distinct(ADM1_NAME, .keep_all = TRUE)
+distinctMm
+```
+
+```{r}
+#this code block performs an 'inner join' on all of our data sets. An inner join is a way of joining data that will 
+#keep only records that are present in both (in our case, all) data sets being joined. 
+#we end up with a lot fewer records (states) than we started with. If you were doing a real analysis, you 
+#would want to be more intentional with your data cleaning to retain as much data as possible.
+allData <- distinctHealthcare %>%
+  inner_join(distinctNOAA, by = "ADM1_NAME") %>%
+  inner_join(distinctMi, by = "ADM1_NAME") %>%
+  inner_join(distinctMm, by = "ADM1_NAME")
+
+allData
+```
+
+```{r}
+#this code selects only the columns relevant to us, getting rid of extraneous data and making our data frame more readable
+columnsWeWant <- c("GID_1", "COUNTRY", "ADM1_NAME", "numHealthcareFacilites", "NOAA_TEMP", "NOAA_RAIN", "GLCC_WETLAND", "malariaIncidence", "malariaMortality")
+
+finalData <- allData[, columnsWeWant]
+finalData
+```
+
+```{r}
+#the na.omit function in this code deletes any records with missing data in any of our desired columns
+cleanData <- na.omit(finalData[, c("GID_1", "COUNTRY", "ADM1_NAME", "numHealthcareFacilites", "NOAA_TEMP", "NOAA_RAIN", "GLCC_WETLAND", "malariaIncidence", "malariaMortality")])
+
+#this code removes any states with 0 healthcare facilities, which should mostly be those which do not 
+#fall within the extent of our healthcare location data set (Morocco, Algeria, Tunisia, Libya, Egypt)
+cleanData <- cleanData %>% filter(numHealthcareFacilites != 0)
+
+cleanData
+```
+
+# 
+
+## Analysis
+
+```{r}
+pairs(cleanData[, 4:9])
+```
+
+```{r}
+cor(cleanData[, 4:9], use = "complete.obs")
+```
+
+```{r}
+vif(lm(malariaMortality ~ GLCC_WETLAND + NOAA_RAIN + NOAA_TEMP + numHealthcareFacilites, data = cleanData))
+```
+
+```{r}
+incidenceModel <- lm(malariaIncidence ~ GLCC_WETLAND + NOAA_RAIN + NOAA_TEMP + numHealthcareFacilites, data = cleanData)
+mortalityModel <- lm(malariaMortality ~ GLCC_WETLAND + NOAA_RAIN + NOAA_TEMP + numHealthcareFacilites, data = cleanData)
+
+summary(incidenceModel)
+```
+
+```{r}
+summary(mortalityModel)
+```
+
+```{r}
+#adding residuals to the data set as a new column (for visualization)
+cleanData$incidenceResiduals <- residuals(incidenceModel)
+cleanData$mortalityResiduals <- residuals(mortalityModel)
+
+cleanData
+```
+
+```{r}
+#merging the data set (a subset of it, anyway) back onto the state polygons, for plotting
+
+residualVariables <- cleanData[, c("GID_1", "incidenceResiduals", "mortalityResiduals")]
+
+polysAfr <- merge(polysAfr, residualVariables, by = "GID_1")
+
+polysAfr
+```
+
+```{r}
+#this code defines symbology for the output plot/map
+num_colors = 7 #number of colors to use
+color_palette <- brewer.pal(7, "RdBu") #color ramp to use
+vals <- polysAfr$mortalityResiduals #variable to draw values from for each geography/state boundary
+breaks <- quantile(vals, probs = seq(0, 1, length.out = num_colors + 1), na.rm = TRUE) #thresholds for each step of values
+color_bins <- cut(vals, breaks = breaks, include.lowest = TRUE) 
+
+coloring <- color_palette[color_bins]
+#coloring[is.na(coloring)] <- "gray"
+par(bg = "darkgray") #background color
+
+plot(polysAfr, col = coloring, main = "Linear Model - Malaria Mortality Residuals")
+```
