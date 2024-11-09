@@ -1,10 +1,3 @@
----
-title: "SunGEO_tut"
-author: "Ryan Piatt"
-format: html
-editor: visual
----
-
 # SunGEO in R
 
 ```{r}
