@@ -8,7 +8,7 @@ If you would like to run the tutorial code locally (on your own computer), make 
 
 
 
-You can also open and run the code *in the cloud* :sunglasses: using the binder button below (note that the notebook may take up to ~10 minutes to launch)   
+You can also open and run the code *in the cloud* :sunglasses: using the binder button below (note that the notebook may take up to ~10 minutes to launch if it hasn't been used in a while)   
 Once the application launches:   
 - Select the rstudio button
 - Open the desired notebook
@@ -19,7 +19,7 @@ Once the application launches:
 
      
              
-Citations:    
+    
 [SunGEO](https://www.sungeo.org/)    
 [The Malaria Atlas Project](https://data.malariaatlas.org/trends?year=2022&metricGroup=Malaria&geographicLevel=admin0&metricSubcategory=Pf&metricType=rate&metricName=incidence)   
 [The Humanitarian Data Exchange](https://data.humdata.org/dataset/health-facilities-in-sub-saharan-africa?)    
