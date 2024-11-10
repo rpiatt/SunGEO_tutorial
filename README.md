@@ -15,6 +15,8 @@ Once the application launches:
   
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rpiatt/SunGEO_tutorial/HEAD)
 
+![gif](./content/video.gif/)
+
      
              
 Citations:    
