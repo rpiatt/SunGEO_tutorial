@@ -15,7 +15,7 @@ Once the application launches:
   
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rpiatt/SunGEO_tutorial/HEAD)
 
-<img src="./content/video.mov/" width="100%" height="100%"/>
+<img src="./content/open.gif/" width="100%" height="100%"/>
 
      
              
